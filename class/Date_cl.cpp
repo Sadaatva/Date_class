@@ -113,11 +113,24 @@ int Date::GetDays() const{
 
          
 int main(){
-  Date d(0, 4, 20);
-  std::cout << "Date: " << d << "\n";
-  
-  d.AddDays(-22);
-  std::cout << "Next: " << d << "\n";
-  
-  return 0;
+    try{
+        Date date(2, 12, 23);
+        date.AddDays(-22);
+    } catch(const DateExceptionsY& ex){
+        std::cerr << "Wrong year: " << ex.years << "\n";
+        return -2;
+    } catch(const DateExceptionsM& ex){
+        std::cerr << "Wrong month: " << ex.months << "\n";
+        return -2;
+    } catch(const DateExceptionsD& ex){
+        std::cerr << "Wrong day: " << ex.days << "\n";
+        return -2;
+    } catch(const std::istream::failure& ex){
+        std::cerr << "Failed to read date: " << ex.what() << "\n";
+        return -2;
+    } catch(...){
+        std::cerr << "Other failure" << "\n";
+        return -2;
+    }
+    return 0;
 }
