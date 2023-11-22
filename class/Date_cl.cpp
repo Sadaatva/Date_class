@@ -1,101 +1,80 @@
 #include <iostream>
 
+struct DateExceptionsY{
+    int years;
+};
 
+struct DateExceptionsM{
+    int months;
+};
+
+struct DateExceptionsD{
+    int days;
+};
+	
 static bool Year4(int years){
         return (years % 4 == 0 && (years % 100 != 0 || years % 400 == 0));
-} 
-
+}
+    
 class Date{
 private:
     int years;
     int months;
     int days;
 
-    void Normalize(){
-
-     int days_m[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 0 для индексов месяцев
-        
-      if(months != 12){
-          years += months / 12;
-          months %= 12;
-        }
-
-      if(months < 0){
-          months = 12 + months;
-          years -= 1;
-        }
-        
-      if(months == 2 && Year4(years)){
-          days_m[2] = 29;
-        } 
-              
-      while(days > days_m[months]){
-        days -= days_m[months];
-        months += 1;
-
-        if (months > 12){
-            years += months/12;
-            months %= 12;
-        }
-    }
-
-      while(days <= 0){
-        months -= 1;
-
-        if (months < 1) {
-            months = 12;
-            years -= 1;
-        }
-        
-        days += days_m[months];
-    }
-};
-    
-
 public:
-    Date(int y, int m, int d);
-    Date(int d) : Date(0, 0, d){
-    
-  }
-  
+   Date(int years, int months, int days) : years(years), months(months), days(days){
+
+	int days_m[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 0 для индексов месяцев
+        
+        if(months == 2 && Year4(years)){
+            days_m[2] = 29;
+        } 
+		
+	if(years <= 0){
+	  throw DateExceptionsY(years);
+	}
+		
+	if(months <= 0 || months > 12){
+	  throw DateExceptionsM(months);
+	}
+		
+	if(days <= 0 || days > days_m[months]){
+	  throw DateExceptionsD(days);
+	}
+   }
+    Date(int days) : years(1), months(1), days(days){
+	int days_m[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+		
+	if(days <= 0 || days > days_m[months]){
+	  throw DateExceptionsD(days);
+	}
+   }
+	
     int GetYears() const;
     int GetMonths() const;
     int GetDays() const;
-  
+	
     Date& operator += (int d){
         days += d;
-        Normalize();
         return *this;
     }
     
     Date operator+ (int d)const{
-    int days_pm = days + d;
+	int days_pm = days + d;
         return Date(years, months, days_pm);
     }
     
     Date operator- (int d)const{
-    int days_pm = days - d;
+	int days_pm = days - d;
         return Date(years, months, days_pm);
     }
-
+        
     void AddDays(int d){
-        days += d;
-        Normalize();
-    }
-    
-    void PrintDate() const {
-        std::cout << years << "\n";
-        std::cout << months << "\n";
-        std::cout << days << "\n";
-    }
+	days += d;
+	Date(years, months, days);
+	}
 };
-
-Date::Date(int y, int m, int d){
-    years = y;
-    months = m;
-    days = d;
-    Normalize();
-}   
 
 std::ostream& operator << (std::ostream& out, const Date& d){
     out << d.GetYears() << " : " << d.GetMonths() << " : " << d.GetDays();
@@ -103,7 +82,12 @@ std::ostream& operator << (std::ostream& out, const Date& d){
 }
 
 std::istream& operator >> (std::istream& in, Date& d){
-    int ys, ms, ds;
+	
+    std::cin.exceptions(std::istream::failbit);
+	
+    int ys;
+    int ms;
+    int ds;
     char c;
     
     in >> ds >> c;
